@@ -170,7 +170,7 @@ class TRX implements WalletInterface
         );
     }
 
-    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?object
+    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?array
     {
         if (!$address->isValid()) {
             return null;
