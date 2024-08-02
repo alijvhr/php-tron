@@ -170,7 +170,7 @@ class TRX implements WalletInterface
         );
     }
 
-    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?array
+    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?object
     {
         if (!$address->isValid()) {
             return null;
@@ -180,12 +180,12 @@ class TRX implements WalletInterface
         $trc20 = $trc20contractAddress ? 'trc20' : '';
 
         $body = $this->_api->get("/v1/accounts/$address->address/transactions/$trc20", [
-            'contract_address' => $address->address,
+            'contract_address' => $trc20contractAddress,
             'limit' => $limit,
             'fingerprint' => $fingerprint,
             'only_confirmed' => $only_confirmed,
         ]);
 
-        return $body->result;
+        return $body->data;
     }
 }
