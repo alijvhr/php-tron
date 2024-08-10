@@ -177,9 +177,9 @@ class TRX implements WalletInterface
         }
 
         $trc20contractAddress = $this->contractAddress ?? '';
-        $trc20 = $trc20contractAddress ? 'trc20' : '';
+        $trc20 = $trc20contractAddress ? '/trc20' : '';
 
-        $body = $this->_api->get("/v1/accounts/$address->address/transactions/$trc20", [
+        $body = $this->_api->get("/v1/accounts/$address->address/transactions$trc20", [
             'contract_address' => $trc20contractAddress,
             'limit' => $limit,
             'fingerprint' => $fingerprint,
