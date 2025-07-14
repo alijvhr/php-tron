@@ -2,22 +2,22 @@
 
 namespace Tron;
 
-use Phactor\Key;
 use IEXBase\TronAPI\Exception\TronException;
-use IEXBase\TronAPI\Tron;
 use IEXBase\TronAPI\Provider\HttpProvider;
-use Tron\Interfaces\WalletInterface;
-use Tron\Exceptions\TronErrorException;
-use Tron\Exceptions\TransactionException;
-use Tron\Support\Key as SupportKey;
+use IEXBase\TronAPI\Tron;
 use InvalidArgumentException;
+use Phactor\Key;
+use Tron\Exceptions\TransactionException;
+use Tron\Exceptions\TronErrorException;
+use Tron\Interfaces\WalletInterface;
+use Tron\Support\Key as SupportKey;
 
 class TRX implements WalletInterface
 {
     protected $_api;
 
     protected $tron;
-    
+
     public function __construct(Api $_api, array $config = [])
     {
         $this->_api = $_api;
@@ -168,5 +168,24 @@ class TRX implements WalletInterface
             $detail['raw_data'],
             $detail['ret'][0]['contractRet'] ?? ''
         );
+    }
+
+    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?array
+    {
+        if (!$address->isValid()) {
+            return null;
+        }
+
+        $trc20contractAddress = $this->contractAddress ?? '';
+        $trc20 = $trc20contractAddress ? '/trc20' : '';
+
+        $body = $this->_api->get("/v1/accounts/$address->address/transactions$trc20", [
+            'contract_address' => $trc20contractAddress,
+            'limit' => $limit,
+            'fingerprint' => $fingerprint,
+            'only_confirmed' => $only_confirmed,
+        ]);
+
+        return $body->data;
     }
 }
