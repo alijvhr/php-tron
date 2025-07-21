@@ -26,7 +26,7 @@ interface TronInterface
     /**
      * Getting a balance
      */
-    public function getBalance(string $address = null): array;
+    public function getBalance(string $address = null): float;
 
     /**
      * Query transaction based on id
@@ -95,7 +95,7 @@ interface TronInterface
     /**
      * Generate new address
      */
-    public function generateAddress(): array;
+    public function generateAddress(): TronAddress;
 
     /**
      * Check the address before converting to Hex
