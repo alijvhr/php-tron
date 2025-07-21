@@ -30,7 +30,7 @@ class TransactionBuilder
      * @param string|null $message
      * @throws TronException
      */
-    public function sendTrx(string $to, float $amount, string $from = null, string $message = null): array
+    public function sendTrx(string $to, float $amount, ?string $from = null, ?string $message = null): array
     {
         if ($amount < 0) {
             throw new TronException('Invalid amount provided');
@@ -254,7 +254,7 @@ class TransactionBuilder
      * @param string|null $address
      * @throws TronException
      */
-    public function freezeBalance(float $amount = 0, int $duration = 3, string $resource = 'BANDWIDTH', string $address = null): array
+    public function freezeBalance(float $amount = 0, int $duration = 3, string $resource = 'BANDWIDTH', ?string $address = null): array
     {
         if ($address === null || $address === '' || $address === '0') {
             throw new TronException('Address not specified');
@@ -286,7 +286,7 @@ class TransactionBuilder
      *
      * @throws TronException
      */
-    public function unfreezeBalance(string $resource = 'BANDWIDTH', string $owner_address = null): array
+    public function unfreezeBalance(string $resource = 'BANDWIDTH', ?string $owner_address = null): array
     {
         if(is_null($owner_address)) {
             throw new TronException('Owner Address not specified');
@@ -308,7 +308,7 @@ class TransactionBuilder
      * @param string|null $owner_address
      * @throws TronException
      */
-    public function withdrawBlockRewards(string $owner_address = null): array
+    public function withdrawBlockRewards( ?string $owner_address = null): array
     {
         $withdraw =  $this->tron->getManager()->request('wallet/withdrawbalance', [
             'owner_address' =>  $this->tron->address2HexString($owner_address)

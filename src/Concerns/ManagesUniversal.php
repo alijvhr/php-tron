@@ -50,7 +50,7 @@ trait ManagesUniversal
      * @param null $private_key
      * @throws ErrorException
      */
-    public function sendOneToMany(array $to, $private_key = null, bool $isValid = false, string $from = null): array
+    public function sendOneToMany(array $to, $private_key = null, bool $isValid = false, ?string $from = null): array
     {
         if(!is_null($private_key)) {
             $this->privateKey = $private_key;

@@ -77,7 +77,7 @@ class TRC20Contract
     protected Tron $_tron, /**
      * The smart contract which issued TRC20 Token
      */
-    private string $contractAddress, string $abi = null)
+    private string $contractAddress, ?string $abi = null)
     {
         // If abi is absent, then it takes by default
         if(is_null($abi)) {
@@ -219,7 +219,7 @@ class TRC20Contract
      * @throws TRC20Exception
      * @throws TronException
      */
-    public function balanceOf(string $address = null, bool $scaled = true): string
+    public function balanceOf( ?string $address = null, bool $scaled = true): string
     {
         if (is_null($address)) {
             $address = $this->_tron->address['base58'];
@@ -245,7 +245,7 @@ class TRC20Contract
      * @throws TRC20Exception
      * @throws TronException
      */
-    public function transfer(string $to, string $amount, string $from = null): array
+    public function transfer(string $to, string $amount, ?string $from = null): array
     {
         if(is_null($from)) {
             $from = $this->_tron->address['base58'];

@@ -2,6 +2,7 @@
 
 namespace Tron;
 
+use Exception;
 use Tron\Exception\TronException;
 use Tron\Provider\HttpProvider;
 use InvalidArgumentException;
@@ -17,9 +18,9 @@ class TRX implements WalletInterface
 
     public Tron $tron;
 
-    public function __construct(protected \Tron\Api $_api, array $config = [])
+    public function __construct(protected Api $_api, array $config = [])
     {
-        $host = $this->_api->getClient()->getConfig('base_uri')?->getScheme() . '://' . $this->_api->getClient()->getConfig('base_uri')?->getHost();
+        $host = $_api->getClient()->getConfig('base_uri')->getScheme() . '://' . $_api->getClient()->getConfig('base_uri')->getHost();
         $fullNode = new HttpProvider($host);
         $solidityNode = new HttpProvider($host);
         $eventServer = new HttpProvider($host);
@@ -100,6 +101,11 @@ class TRX implements WalletInterface
         return $address;
     }
 
+    public function resource(Address $address): array
+    {
+        return $this->tron->getAccountResources($address->address);
+    }
+
     public function balance(Address $address): float
     {
         $this->tron->setAddress($address->address);
@@ -130,6 +136,9 @@ class TRX implements WalletInterface
         throw new TransactionException(hex2bin($response['message']));
     }
 
+    /**
+     * @throws TransactionException
+     */
     public function blockNumber(): Block
     {
         try {
@@ -141,6 +150,10 @@ class TRX implements WalletInterface
         return new Block($block['blockID'], $block['block_header'], $transactions);
     }
 
+    /**
+     * @throws TransactionException
+     * @throws Exception
+     */
     public function blockByNumber(int $blockID): Block
     {
         try {
@@ -153,6 +166,9 @@ class TRX implements WalletInterface
         return new Block($block['blockID'], $block['block_header'], $transactions);
     }
 
+    /**
+     * @throws TransactionException
+     */
     public function transactionReceipt(string $txHash): Transaction
     {
         try {
@@ -173,8 +189,8 @@ class TRX implements WalletInterface
             return null;
         }
 
-        $trc20contractAddress = $this->contractAddress ?? '';
-        $trc20 = $trc20contractAddress ? '/trc20' : '';
+        $trc20contractAddress = $this->contractAddress?->address ?? '';
+        $trc20 = $trc20contractAddress !== '' && $trc20contractAddress !== '0' ? '/trc20' : '';
 
         $body = $this->_api->get("/v1/accounts/$address->address/transactions$trc20", [
             'contract_address' => $trc20contractAddress,

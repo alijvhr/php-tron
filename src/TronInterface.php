@@ -26,7 +26,7 @@ interface TronInterface
     /**
      * Getting a balance
      */
-    public function getBalance(string $address = null): float;
+    public function getBalance( ?string $address = null): float;
 
     /**
      * Query transaction based on id
@@ -49,7 +49,7 @@ interface TronInterface
      *
      * @throws TronException
      */
-    public function sendTransaction(string $to, float $amount, string $from = null): array;
+    public function sendTransaction(string $to, float $amount, ?string $from = null): array;
 
     /**
      * Modify account name
@@ -58,7 +58,7 @@ interface TronInterface
      * @param $address
      * @param $account_name
      */
-    public function changeAccountName(string $account_name, string $address = null): array;
+    public function changeAccountName(string $account_name, ?string $address = null): array;
 
     /**
      * Create an account.

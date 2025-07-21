@@ -6,7 +6,7 @@ use InvalidArgumentException;
 use Tron\Support\Base58Check;
 use Tron\Support\Hash;
 
-class Address
+class Address implements \Stringable
 {
     use TronAwareTrait;
     public string $address;
