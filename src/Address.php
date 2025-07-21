@@ -54,4 +54,9 @@ class Address
         $checkSum1 = substr($hash1, 0, 4);
         return $checkSum === $checkSum1;
     }
+
+    public function __toString(): string
+    {
+        return $this->address;
+    }
 }

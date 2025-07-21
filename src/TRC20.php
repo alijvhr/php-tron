@@ -33,7 +33,7 @@ class TRC20 extends TRX
     /**
      * @throws TronErrorException
      */
-    public function balance(Address $address): string
+    public function balance(Address $address): float
     {
         $format = Formatter::toAddressFormat($address->hexAddress);
         $body = $this->_api->post('/wallet/triggersmartcontract', [

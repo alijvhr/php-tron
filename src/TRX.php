@@ -19,7 +19,7 @@ class TRX implements WalletInterface
 
     public function __construct(protected \Tron\Api $_api, array $config = [])
     {
-        $host = $this->_api->getClient()->getConfig('base_uri')->getScheme() . '://' . $this->_api->getClient()->getConfig('base_uri')->getHost();
+        $host = $this->_api->getClient()->getConfig('base_uri')?->getScheme() . '://' . $this->_api->getClient()->getConfig('base_uri')?->getHost();
         $fullNode = new HttpProvider($host);
         $solidityNode = new HttpProvider($host);
         $eventServer = new HttpProvider($host);
@@ -119,15 +119,15 @@ class TRX implements WalletInterface
             throw new TransactionException($e->getMessage(), $e->getCode());
         }
 
-        if (isset($response['result']) && $response['result'] == true) {
+        if (isset($response['result']) && $response['result']) {
             return new Transaction(
                 $transaction['txID'],
                 $transaction['raw_data'],
                 'PACKING'
             );
-        } else {
-            throw new TransactionException(hex2bin($response['message']));
         }
+
+        throw new TransactionException(hex2bin($response['message']));
     }
 
     public function blockNumber(): Block
@@ -167,7 +167,7 @@ class TRX implements WalletInterface
         );
     }
 
-    public function walletTransactions(Address $address, int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?array
+    public function walletTransactions(Address $address, ?int $limit = null, string $fingerprint = '', bool $only_confirmed = true): ?array
     {
         if (!$address->isValid()) {
             return null;
