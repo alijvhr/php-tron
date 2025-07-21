@@ -7,11 +7,8 @@ use Tron\Exceptions\TronErrorException;
 
 class Api
 {
-    private $_client;
-
-    public function __construct(Client $client)
+    public function __construct(private Client $_client)
     {
-        $this->_client = $client;
     }
 
     public function getClient(): Client
@@ -27,7 +24,7 @@ class Api
      */
     public function post(string $endpoint, array $data = [], bool $returnAssoc = false)
     {
-        if (sizeof($data)) {
+        if (count($data) !== 0) {
             $data = ['json' => $data];
         }
 
@@ -46,7 +43,7 @@ class Api
      */
     public function get(string $endpoint, array $data = [], bool $returnAssoc = false)
     {
-        if (sizeof($data)) {
+        if (count($data) !== 0) {
             $data = ['query' => $data];
         }
 
@@ -61,11 +58,10 @@ class Api
     /**
      * Check if the response has an error and throw it.
      *
-     * @param bool $returnAssoc
      * @param $body
      * @throws TronErrorException
      */
-    private function checkForErrorResponse(bool $returnAssoc, $body)
+    private function checkForErrorResponse(bool $returnAssoc, $body): void
     {
         if ($returnAssoc) {
             if (isset($body['Error'])) {

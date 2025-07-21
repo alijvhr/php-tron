@@ -1,5 +1,5 @@
 <?php
-namespace IEXBase\TronAPI\Support;
+namespace Tron\Support;
 
 class Base58
 {
@@ -7,11 +7,8 @@ class Base58
      * Encodes the passed whole string to base58.
      *
      * @param $num
-     * @param int $length
-     *
-     * @return string
      */
-    public static function encode($num, $length = 58): string
+    public static function encode($num, int $length = 58): string
     {
         return Crypto::dec2base($num, $length, '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz');
     }
@@ -19,10 +16,7 @@ class Base58
     /**
      * Base58 decodes a large integer to a string.
      *
-     * @param string $addr
-     * @param int $length
      *
-     * @return string
      */
     public static function decode(string $addr, int $length = 58): string
     {

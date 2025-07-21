@@ -2,29 +2,25 @@
 
 namespace Tron;
 
-use IEXBase\TronAPI\Support\Base58Check;
-use IEXBase\TronAPI\Support\Hash;
-use IEXBase\TronAPI\TronAwareTrait;
+use InvalidArgumentException;
+use Tron\Support\Base58Check;
+use Tron\Support\Hash;
 
 class Address
 {
     use TronAwareTrait;
-
-    public $privateKey,
-        $address,
-        $hexAddress = '';
+    public string $address;
+    public string $hexAddress = '';
 
     const ADDRESS_SIZE = 34;
     const ADDRESS_PREFIX = "41";
     const ADDRESS_PREFIX_BYTE = 0x41;
 
-    public function __construct(string $address = '', string $privateKey = '', string $hexAddress = '')
+    public function __construct(string $address = '', public string $privateKey = '', string $hexAddress = '')
     {
-        if (strlen($address) === 0) {
-            throw new \InvalidArgumentException('Address can not be empty');
+        if ($address === '') {
+            throw new InvalidArgumentException('Address can not be empty');
         }
-
-        $this->privateKey = $privateKey;
         $this->address = $address;
         $this->hexAddress = $hexAddress ?: $this->address2HexString($address);
     }
@@ -32,8 +28,6 @@ class Address
     /**
      * Dont rely on this. Always use Wallet::validateAddress to double check
      * against tronGrid.
-     *
-     * @return bool
      */
     public function isValid(): bool
     {
@@ -48,7 +42,7 @@ class Address
             return false;
         }
 
-        if (strpos($utf8, chr(self::ADDRESS_PREFIX_BYTE)) !== 0) {
+        if (!str_starts_with($utf8, chr(self::ADDRESS_PREFIX_BYTE))) {
             return false;
         }
 
@@ -58,11 +52,6 @@ class Address
         $hash0 = Hash::SHA256($address);
         $hash1 = Hash::SHA256($hash0);
         $checkSum1 = substr($hash1, 0, 4);
-
-        if ($checkSum === $checkSum1) {
-            return true;
-        }
-
-        return false;
+        return $checkSum === $checkSum1;
     }
 }

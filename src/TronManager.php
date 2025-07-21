@@ -1,17 +1,15 @@
 <?php
-namespace IEXBase\TronAPI;
+namespace Tron;
 
 
-use IEXBase\TronAPI\Exception\TronException;
-use IEXBase\TronAPI\Provider\{HttpProvider, HttpProviderInterface};
+use Tron\Exception\TronException;
+use Tron\Provider\{HttpProvider, HttpProviderInterface};
 
 class TronManager
 {
     /**
      * Default Nodes
-     *
-     * @var array
-    */
+     */
     protected array $defaultNodes = [
         'fullNode'      =>  'https://api.trongrid.io',
         'solidityNode'  =>  'https://api.trongrid.io',
@@ -21,23 +19,8 @@ class TronManager
     ];
 
     /**
-     * Providers
-     *
-     * @var array
-    */
-    protected array $providers = [
-        'fullNode'      =>  [],
-        'solidityNode'  =>  [],
-        'eventServer'   =>  [],
-        'explorer'      =>  [],
-        'signServer'    =>  []
-    ];
-
-    /**
      * Status Page
-     *
-     * @var array
-    */
+     */
     protected array $statusPage = [
         'fullNode'      =>  'wallet/getnowblock',
         'solidityNode'  =>  'walletsolidity/getnowblock',
@@ -46,15 +29,15 @@ class TronManager
     ];
 
     /**
-     * @param $tron
      * @param $providers
-     * @throws Exception\TronException
+     *@throws Exception\TronException
      */
-    public function __construct($tron, $providers)
+    public function __construct(/**
+     * Providers
+     */
+        protected array $providers)
     {
-        $this->providers = $providers;
-
-        foreach ($providers as $key => $value)
+        foreach ($this->providers as $key => $value)
         {
             //Do not skip the supplier is empty
             if ($value == null) {
@@ -63,11 +46,13 @@ class TronManager
                 );
             };
 
-            if(is_string($providers[$key]))
+            if (is_string($this->providers[$key])) {
                 $this->providers[$key] = new HttpProvider($value);
+            }
 
-            if(in_array($key, ['signServer']))
+            if ($key == 'signServer') {
                 continue;
+            }
 
             $this->providers[$key]->setStatusPage($this->statusPage[$key]);
         }
@@ -75,10 +60,8 @@ class TronManager
 
     /**
      * List of providers
-     *
-     * @return array
      */
-    public function getProviders() {
+    public function getProviders(): array {
         return $this->providers;
     }
 
@@ -86,7 +69,6 @@ class TronManager
      * Full Node
      *
      * @throws TronException
-     * @return HttpProviderInterface
      */
     public function fullNode() : HttpProviderInterface
     {
@@ -101,7 +83,6 @@ class TronManager
      * Solidity Node
      *
      * @throws TronException
-     * @return HttpProviderInterface
      */
     public function solidityNode() : HttpProviderInterface
     {
@@ -116,7 +97,6 @@ class TronManager
      * Sign server
      *
      * @throws TronException
-     * @return HttpProviderInterface
      */
     public function signServer(): HttpProviderInterface
     {
@@ -131,7 +111,6 @@ class TronManager
      * TronScan server
      *
      * @throws TronException
-     * @return HttpProviderInterface
      */
     public function explorer(): HttpProviderInterface
     {
@@ -146,7 +125,6 @@ class TronManager
      * Event server
      *
      * @throws TronException
-     * @return HttpProviderInterface
      */
     public function eventServer(): HttpProviderInterface
     {
@@ -161,21 +139,18 @@ class TronManager
      * Basic query to nodes
      *
      * @param $url
-     * @param array $params
-     * @param string $method
-     * @return array
      * @throws TronException
      */
-    public function request($url, array $params = [], string $method = 'post')
+    public function request(string $url, array $params = [], string $method = 'post'): array
     {
         $split = explode('/', $url);
         if(in_array($split[0], ['walletsolidity', 'walletextension'])) {
             $response = $this->solidityNode()->request($url, $params, $method);
-        } elseif(in_array($split[0], ['event'])) {
+        } elseif($split[0] == 'event') {
             $response = $this->eventServer()->request($url, $params, 'get');
-        } elseif (in_array($split[0], ['trx-sign'])) {
+        } elseif ($split[0] == 'trx-sign') {
             $response = $this->signServer()->request($url, $params, 'post');
-        } elseif(in_array($split[0], ['api'])) {
+        } elseif($split[0] == 'api') {
             $response = $this->explorer()->request($url, $params, 'get');
         }else {
             $response = $this->fullNode()->request($url, $params, $method);
@@ -186,9 +161,7 @@ class TronManager
 
     /**
      * Check connections
-     *
-     * @return array
-    */
+     */
     public function isConnected(): array
     {
         $array = [];

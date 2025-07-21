@@ -4,20 +4,14 @@ namespace Tron;
 
 class Transaction
 {
-    public $signature = [];
-    public $txID = '';
-    public $raw_data = [];
-    public $contractRet = '';
+    public array $signature = [];
 
-    public function __construct(string $txID, array $rawData, string $contractRet)
+    public function __construct(public string $txID, public array $raw_data, public string $contractRet)
     {
-        $this->txID = $txID;
-        $this->raw_data = $rawData;
-        $this->contractRet = $contractRet;
     }
 
     public function isSigned(): bool
     {
-        return (bool)sizeof($this->signature);
+        return (bool)count($this->signature);
     }
 }

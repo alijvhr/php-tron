@@ -2,19 +2,22 @@
 
 namespace Tron;
 
-use IEXBase\TronAPI\Exception\TronException;
+use Tron\Exception\TronException;
+use InvalidArgumentException;
 use Tron\Exceptions\TransactionException;
 use Tron\Exceptions\TronErrorException;
 use Tron\Support\Formatter;
 use Tron\Support\Utils;
-use InvalidArgumentException;
 
 class TRC20 extends TRX
 {
-    protected $contractAddress;
+    public Address $contractAddress;
 
-    protected $decimals;
+    protected int $decimals;
 
+    /**
+     * @throws TronErrorException
+     */
     public function __construct(Api $_api, array $config)
     {
         parent::__construct($_api, $config);
@@ -27,14 +30,17 @@ class TRC20 extends TRX
         $this->decimals = $config['decimals'];
     }
 
-    public function balance(Address $address)
+    /**
+     * @throws TronErrorException
+     */
+    public function balance(Address $address): string
     {
         $format = Formatter::toAddressFormat($address->hexAddress);
         $body = $this->_api->post('/wallet/triggersmartcontract', [
-            'contract_address' => $this->contractAddress->hexAddress,
+            'contract_address'  => $this->contractAddress->hexAddress,
             'function_selector' => 'balanceOf(address)',
-            'parameter' => $format,
-            'owner_address' => $address->hexAddress,
+            'parameter'         => $format,
+            'owner_address'     => $address->hexAddress,
         ]);
 
         if (isset($body->result->code)) {
@@ -49,6 +55,10 @@ class TRC20 extends TRX
         return $balance;
     }
 
+    /**
+     * @throws TransactionException
+     * @throws TronErrorException
+     */
     public function transfer(Address $from, Address $to, float $amount): Transaction
     {
         $this->tron->setAddress($from->address);
@@ -63,12 +73,12 @@ class TRC20 extends TRX
         $numberFormat = Formatter::toIntegerFormat($amount);
 
         $body = $this->_api->post('/wallet/triggersmartcontract', [
-            'contract_address' => $this->contractAddress->hexAddress,
+            'contract_address'  => $this->contractAddress->hexAddress,
             'function_selector' => 'transfer(address,uint256)',
-            'parameter' => "{$toFormat}{$numberFormat}",
-            'fee_limit' => 100000000,
-            'call_value' => 0,
-            'owner_address' => $from->hexAddress,
+            'parameter'         => "$toFormat$numberFormat",
+            'fee_limit'         => 100000000,
+            'call_value'        => 0,
+            'owner_address'     => $from->hexAddress,
         ], true);
 
         if (isset($body['result']['code'])) {
@@ -82,14 +92,11 @@ class TRC20 extends TRX
             throw new TransactionException($e->getMessage(), $e->getCode());
         }
 
-        if (isset($response['result']) && $response['result'] == true) {
-            return new Transaction(
-                $body['transaction']['txID'],
-                $body['transaction']['raw_data'],
-                'PACKING'
-            );
-        } else {
-            throw new TransactionException(hex2bin($response['result']['message']));
-        }
+        return isset($response['result']) && $response['result'] ? new Transaction(
+            $body['transaction']['txID'],
+            $body['transaction']['raw_data'],
+            'PACKING'
+        ) : throw new TransactionException(hex2bin($response['result']['message']));
+
     }
 }

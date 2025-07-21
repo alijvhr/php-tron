@@ -1,17 +1,15 @@
 <?php
-namespace IEXBase\TronAPI\Concerns;
+namespace Tron\Concerns;
 
 
-use IEXBase\TronAPI\Exception\ErrorException;
+use Tron\Exception\ErrorException;
 
 trait ManagesUniversal
 {
     /**
      * Default Attributes
-     *
-     * @var array
-    */
-    private $attribute = [
+     */
+    private array $attribute = [
         'balances'  =>  [],
         'one_to_many' => []
     ];
@@ -19,10 +17,9 @@ trait ManagesUniversal
     /**
      * Check multiple balances
      *
-     * @param bool $isValid
      * @throws ErrorException
      */
-    public function balances(array $accounts, $isValid = false): array
+    public function balances(array $accounts, bool $isValid = false): array
     {
         if(!is_array($accounts)) {
             throw new ErrorException('Data must be an array');

@@ -1,14 +1,14 @@
 <?php
-namespace IEXBase\TronAPI\Support;
+namespace Tron\Support;
 
 class Crypto
 {
-    public static function bc2bin($num)
+    public static function bc2bin($num): string
     {
         return self::dec2base($num, 256);
     }
 
-    public static function dec2base($dec, $base, $digits = false)
+    public static function dec2base($dec, $base, $digits = false): string
     {
         if (extension_loaded('bcmath')) {
             if ($base < 2 || $base > 256) {
@@ -24,14 +24,13 @@ class Crypto
                 $dec = bcdiv($dec, $base);
                 $value = $digits[$rest] . $value;
             }
-            $value = $digits[intval($dec)] . $value;
-            return (string)$value;
+            return $digits[intval($dec)] . $value;
         } else {
             die('Please install BCMATH');
         }
     }
 
-    public static function base2dec($value, $base, $digits = false)
+    public static function base2dec($value, $base, $digits = false): string
     {
         if (extension_loaded('bcmath')) {
             if ($base < 2 || $base > 256) {
@@ -47,17 +46,17 @@ class Crypto
             $size = strlen($value);
             $dec = "0";
             for ($loop = 0; $loop < $size; $loop++) {
-                $element = strpos($digits, $value[$loop]);
+                $element = strpos($digits, (string) $value[$loop]);
                 $power = bcpow($base, $size - $loop - 1);
                 $dec = bcadd($dec, bcmul($element, $power));
             }
-            return (string)$dec;
+            return $dec;
         } else {
             die('Please install BCMATH');
         }
     }
 
-    public static function digits($base)
+    public static function digits($base): string
     {
         if ($base > 64) {
             $digits = "";
@@ -68,11 +67,10 @@ class Crypto
             $digits = "0123456789abcdefghijklmnopqrstuvwxyz";
             $digits .= "ABCDEFGHIJKLMNOPQRSTUVWXYZ-_";
         }
-        $digits = substr($digits, 0, $base);
-        return (string)$digits;
+        return substr($digits, 0, $base);
     }
 
-    public static function bin2bc($num)
+    public static function bin2bc($num): string
     {
         return self::base2dec($num, 256);
     }

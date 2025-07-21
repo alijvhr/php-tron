@@ -1,11 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace IEXBase\TronAPI\Provider;
+namespace Tron\Provider;
 
 use GuzzleHttp\{Psr7\Request, Client, ClientInterface};
 use Psr\Http\Message\StreamInterface;
-use IEXBase\TronAPI\Exception\{NotFoundException, TronException};
-use IEXBase\TronAPI\Support\Utils;
+use Tron\Exception\{NotFoundException, TronException};
+use Tron\Support\Utils;
 
 class HttpProvider implements HttpProviderInterface
 {
@@ -34,13 +34,11 @@ class HttpProvider implements HttpProviderInterface
     /**
      * Create an HttpProvider object
      *
-     * @param $user
-     * @param $password
      * @throws TronException
      */
-    public function __construct(string $host, int $timeout = 30000,
-                                $user = false, $password = false,
-                                array $headers = [], /**
+    public function __construct(string           $host, int $timeout = 30000,
+                                bool             $user = false, bool $password = false,
+                                array            $headers = [], /**
                                  * Get the pages
                                  */
                                 protected string $statusPage = '/')
@@ -112,11 +110,10 @@ class HttpProvider implements HttpProviderInterface
     /**
      * We send requests to the server
      *
-     * @param $url
      * @return array|mixed
      * @throws TronException
      */
-    public function request($url, array $payload = [], string $method = 'get'): array
+    public function request(string $url, array $payload = [], string $method = 'get'): array
     {
         $method = strtoupper($method);
 

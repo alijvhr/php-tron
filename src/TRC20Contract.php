@@ -14,11 +14,11 @@
 
 declare(strict_types=1);
 
-namespace IEXBase\TronAPI;
+namespace Tron;
 
 use Comely\DataTypes\BcNumber;
-use IEXBase\TronAPI\Exception\TRC20Exception;
-use IEXBase\TronAPI\Exception\TronException;
+use Tron\Exception\TRC20Exception;
+use Tron\Exception\TronException;
 
 /**
  * Class TRC20Contract
@@ -50,64 +50,46 @@ class TRC20Contract
     private ?string $_symbol = null;
 
     /**
-     * The smart contract which issued TRC20 Token
-     *
-     * @var string
-    */
-    private string $contractAddress;
-
-    /**
      * ABI Data
      *
      * @var string|null
     */
-    private $abiData;
+    private mixed $abiData;
 
     /**
      * Fee Limit
-     *
-     * @var integer
      */
     private int $feeLimit = 10;
 
     /**
-     * Base Tron object
-     *
-     * @var Tron
-     */
-    protected Tron $_tron;
-
-    /**
      * Total Supply
-     *
-     * @var string|null
-    */
+     */
     private ?string $_totalSupply = null;
 
     /**
      * Create Trc20 Contract
      *
-     * @param Tron $tron
-     * @param string $contractAddress
      * @param string|null $abi
      */
-    public function __construct(Tron $tron, string $contractAddress, string $abi = null)
+    public function __construct(/**
+     * Base Tron object
+     */
+    protected Tron $_tron, /**
+     * The smart contract which issued TRC20 Token
+     */
+    private string $contractAddress, string $abi = null)
     {
-        $this->_tron = $tron;
-
         // If abi is absent, then it takes by default
         if(is_null($abi)) {
             $abi = file_get_contents(__DIR__.'/trc20.json');
         }
 
         $this->abiData = json_decode($abi, true);
-        $this->contractAddress = $contractAddress;
     }
 
     /**
      * Debug Info
      *
-     * @return array
      * @throws TronException
      */
     public function __debugInfo(): array
@@ -117,8 +99,6 @@ class TRC20Contract
 
     /**
      * Clears cached values
-     *
-     * @return void
      */
     public function clearCached(): void
     {
@@ -146,7 +126,6 @@ class TRC20Contract
     /**
      * Get token name
      *
-     * @return string
      * @throws TronException
      */
     public function name(): string
@@ -169,7 +148,6 @@ class TRC20Contract
     /**
      * Get symbol name
      *
-     * @return string
      * @throws TronException
      */
     public function symbol(): string
@@ -191,8 +169,6 @@ class TRC20Contract
     /**
      * The total number of tokens issued on the main network
      *
-     * @param bool $scaled
-     * @return string
      * @throws Exception\TronException
      * @throws TRC20Exception
      */
@@ -203,7 +179,7 @@ class TRC20Contract
             $result = $this->trigger('totalSupply', null, []);
             $totalSupply = $result[0]->toString() ?? null;
 
-            if (!is_string($totalSupply) || !preg_match('/^[0-9]+$/', $totalSupply)) {
+            if (!is_string($totalSupply) || !preg_match('/^\d+$/', $totalSupply)) {
                 throw new TRC20Exception('Failed to retrieve TRC20 token totalSupply');
             }
 
@@ -240,21 +216,20 @@ class TRC20Contract
      * Balance TRC20 contract
      *
      * @param string|null $address
-     * @param bool $scaled
-     * @return string
      * @throws TRC20Exception
      * @throws TronException
      */
     public function balanceOf(string $address = null, bool $scaled = true): string
     {
-        if(is_null($address))
+        if (is_null($address)) {
             $address = $this->_tron->address['base58'];
+        }
 
         $addr = str_pad($this->_tron->address2HexString($address), 64, "0", STR_PAD_LEFT);
         $result = $this->trigger('balanceOf', $address, [$addr]);
         $balance = $result[0]->toString();
 
-        if (!is_string($balance) || !preg_match('/^[0-9]+$/', $balance)) {
+        if (!is_string($balance) || !preg_match('/^\d+$/', $balance)) {
             throw new TRC20Exception(
                 sprintf('Failed to retrieve TRC20 token balance of address "%s"', $addr)
             );
@@ -266,28 +241,27 @@ class TRC20Contract
     /**
      * Send TRC20 contract
      *
-     * @param string $to
-     * @param string $amount
      * @param string|null $from
-     * @return array
      * @throws TRC20Exception
      * @throws TronException
      */
     public function transfer(string $to, string $amount, string $from = null): array
     {
-        if($from == null) {
+        if(is_null($from)) {
             $from = $this->_tron->address['base58'];
         }
 
         $feeLimitInSun = bcmul((string)$this->feeLimit, (string)self::TRX_TO_SUN);
 
-        if (!is_numeric($this->feeLimit) OR $this->feeLimit <= 0) {
+        if (!is_numeric($this->feeLimit) || $this->feeLimit <= 0) {
             throw new TRC20Exception('fee_limit is required.');
-        } else if($this->feeLimit > 1000) {
+        }
+
+        if ($this->feeLimit > 1000) {
             throw new TRC20Exception('fee_limit must not be greater than 1000 TRX.');
         }
 
-        $tokenAmount = bcmul($amount, bcpow("10", (string)$this->decimals(), 0), 0);
+        $tokenAmount = bcmul($amount, bcpow('10', (string)$this->decimals(), 0), 0);
 
         $transfer = $this->_tron->getTransactionBuilder()
             ->triggerSmartContract(
@@ -308,9 +282,6 @@ class TRC20Contract
     /**
      *  TRC20 All transactions
      *
-     * @param string $address
-     * @param int $limit
-     * @return array
      *
      * @throws TronException
      */
@@ -345,8 +316,6 @@ class TRC20Contract
     /**
      *  Find transaction
      *
-     * @param string $transaction_id
-     * @return array
      * @throws TronException
      */
     public function getTransaction(string $transaction_id): array
@@ -360,11 +329,9 @@ class TRC20Contract
      *
      * @param $function
      * @param null $address
-     * @param array $params
-     * @return mixed
      * @throws TronException
      */
-    private function trigger($function, $address = null, array $params = [])
+    private function trigger(string $function, $address = null, array $params = []): mixed
     {
         $owner_address = is_null($address) ? '410000000000000000000000000000000000000000' : $this->_tron->address2HexString($address);
 
@@ -372,20 +339,11 @@ class TRC20Contract
             ->triggerConstantContract($this->abiData, $this->_tron->address2HexString($this->contractAddress), $function, $params, $owner_address);
     }
 
-    /**
-     * @param string $int
-     * @param int $scale
-     * @return string
-     */
     protected function decimalValue(string $int, int $scale = 18): string
     {
-        return (new BcNumber($int))->divide(pow(10, $scale), $scale)->value();
+        return (new BcNumber($int))->divide(10 ** $scale, $scale)->value();
     }
 
-    /**
-     * @param string $str
-     * @return string
-     */
     public function cleanStr(string $str): string
     {
         return preg_replace('/[^\w.-]/', '', trim($str));
@@ -393,9 +351,6 @@ class TRC20Contract
 
     /**
      * Set fee limit
-     *
-     * @param int $fee_limit
-     * @return TRC20Contract
      */
     public function setFeeLimit(int $fee_limit) : TRC20Contract
     {

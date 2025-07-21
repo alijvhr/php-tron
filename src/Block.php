@@ -2,20 +2,18 @@
 
 namespace Tron;
 
+use Exception;
+
 class Block
 {
-    public $blockID;
-    public $block_header;
-    public $transactions;
+    public string $blockID;
 
-    public function __construct(string $blockID, array $block_header, array $transactions = [])
+    public function __construct(string $blockID, public array $block_header, public array $transactions = [])
     {
-        if (!strlen($blockID)) {
-            throw new \Exception('blockID empty');
+        if ($blockID === '') {
+            throw new Exception('blockID empty');
         }
 
         $this->blockID = $blockID;
-        $this->block_header = $block_header;
-        $this->transactions = $transactions;
     }
 }

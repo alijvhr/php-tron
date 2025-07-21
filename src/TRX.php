@@ -2,9 +2,8 @@
 
 namespace Tron;
 
-use IEXBase\TronAPI\Exception\TronException;
-use IEXBase\TronAPI\Provider\HttpProvider;
-use IEXBase\TronAPI\Tron;
+use Tron\Exception\TronException;
+use Tron\Provider\HttpProvider;
 use InvalidArgumentException;
 use Phactor\Key;
 use Tron\Exceptions\TransactionException;
@@ -14,15 +13,13 @@ use Tron\Support\Key as SupportKey;
 
 class TRX implements WalletInterface
 {
-    protected $_api;
+    public Address $contractAddress;
 
-    protected $tron;
+    public Tron $tron;
 
-    public function __construct(Api $_api, array $config = [])
+    public function __construct(protected \Tron\Api $_api, array $config = [])
     {
-        $this->_api = $_api;
-
-        $host = $_api->getClient()->getConfig('base_uri')->getScheme() . '://' . $_api->getClient()->getConfig('base_uri')->getHost();
+        $host = $this->_api->getClient()->getConfig('base_uri')->getScheme() . '://' . $this->_api->getClient()->getConfig('base_uri')->getHost();
         $fullNode = new HttpProvider($host);
         $solidityNode = new HttpProvider($host);
         $eventServer = new HttpProvider($host);
@@ -103,7 +100,7 @@ class TRX implements WalletInterface
         return $address;
     }
 
-    public function balance(Address $address)
+    public function balance(Address $address): float
     {
         $this->tron->setAddress($address->address);
         return $this->tron->getBalance(null, true);
@@ -140,7 +137,7 @@ class TRX implements WalletInterface
         } catch (TronException $e) {
             throw new TransactionException($e->getMessage(), $e->getCode());
         }
-        $transactions = isset($block['transactions']) ? $block['transactions'] : [];
+        $transactions = $block['transactions'] ?? [];
         return new Block($block['blockID'], $block['block_header'], $transactions);
     }
 
@@ -152,7 +149,7 @@ class TRX implements WalletInterface
             throw new TransactionException($e->getMessage(), $e->getCode());
         }
 
-        $transactions = isset($block['transactions']) ? $block['transactions'] : [];
+        $transactions = $block['transactions'] ?? [];
         return new Block($block['blockID'], $block['block_header'], $transactions);
     }
 

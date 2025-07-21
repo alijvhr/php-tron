@@ -1,6 +1,8 @@
 <?php
-namespace IEXBase\TronAPI\Exception;
+namespace Tron\Exception;
 
-class TronException extends \Exception {
+use Exception;
+
+class TronException extends Exception {
     //
 }

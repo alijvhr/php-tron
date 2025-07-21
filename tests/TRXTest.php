@@ -26,14 +26,13 @@ class TRXTest extends TestCase
     const BLOCK_ID = 13402554;
     const TX_HASH = '539e6c2429f19a8626fadc1211985728e310f5bd5d2749c88db2e3f22a8fdf69';
 
-    private function getTRX()
+    private function getTRX(): \Tron\TRX
     {
         $api = new Api(new Client(['base_uri' => self::URI]));
-        $trxWallet = new TRX($api);
-        return $trxWallet;
+        return new TRX($api);
     }
 
-    public function testGenerateAddress()
+    public function testGenerateAddress(): void
     {
         $addressData = $this->getTRX()->generateAddress();
         var_dump($addressData);
@@ -41,7 +40,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testPrivateKeyToAddress()
+    public function testPrivateKeyToAddress(): void
     {
         $privateKey = self::PRIVATE_KEY;
         $addressData = $this->getTRX()->privateKeyToAddress($privateKey);
@@ -50,7 +49,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testBalance()
+    public function testBalance(): void
     {
         $address = new Address(
             self::ADDRESS,
@@ -63,7 +62,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testTransfer()
+    public function testTransfer(): void
     {
         $privateKey = self::PRIVATE_KEY;
         $address = self::ADDRESS;
@@ -81,7 +80,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testBlockNumber()
+    public function testBlockNumber(): void
     {
         $blockData = $this->getTRX()->blockNumber();
         var_dump($blockData);
@@ -89,7 +88,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testBlockByNumber()
+    public function testBlockByNumber(): void
     {
         $blockID = self::BLOCK_ID;
         $blockData = $this->getTRX()->blockByNumber($blockID);
@@ -98,7 +97,7 @@ class TRXTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testTransactionReceipt()
+    public function testTransactionReceipt(): void
     {
         $txHash = self::TX_HASH;
         $txData = $this->getTRX()->transactionReceipt($txHash);

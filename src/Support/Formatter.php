@@ -13,9 +13,8 @@ class Formatter
     /**
      * 对于方法名和参数类型做签名
      * @param $method
-     * @return string
      */
-    public static function toMethodFormat($method)
+    public static function toMethodFormat(string $method): string
     {
         return Utils::stripZero(substr(Utils::sha3($method), 0, 10));
     }
@@ -23,9 +22,8 @@ class Formatter
     /**
      * 地址签名
      * @param $address
-     * @return string
      */
-    public static function toAddressFormat($address)
+    public static function toAddressFormat($address): string
     {
         if (Utils::isAddress($address)) {
             $address = strtolower($address);
@@ -40,10 +38,8 @@ class Formatter
     /**
      * 数字签名
      * @param $value
-     * @param int $digit
-     * @return string
      */
-    public static function toIntegerFormat($value, $digit = 64)
+    public static function toIntegerFormat($value, int $digit = 64): string
     {
         $bn = Utils::toBn($value);
         $bnHex = $bn->toHex(true);

@@ -1,21 +1,16 @@
 <?php
-namespace IEXBase\TronAPI\Support;
+namespace Tron\Support;
 
 class Base58Check
 {
     /**
      * Encode Base58Check
-     *
-     * @param string $string
-     * @param int $prefix
-     * @param bool $compressed
-     * @return string
      */
-    public static function encode(string $string, int $prefix = 128, bool $compressed = true)
+    public static function encode(string $string, int $prefix = 128, bool $compressed = true): string
     {
         $string = hex2bin($string);
 
-        if ($prefix) {
+        if ($prefix !== 0) {
             $string = chr($prefix) . $string;
         }
 
@@ -23,11 +18,11 @@ class Base58Check
             $string .= chr(0x01);
         }
 
-        $string = $string . substr(Hash::SHA256(Hash::SHA256($string)), 0, 4);
+        $string .= substr(Hash::SHA256(Hash::SHA256($string)), 0, 4);
 
         $base58 = Base58::encode(Crypto::bin2bc($string));
-        for ($i = 0; $i < strlen($string); $i++) {
-            if ($string[$i] != "\x00") {
+        for ($i = 0, $iMax = strlen($string); $i < $iMax; $i++) {
+            if ($string[$i] !== "\x00") {
                 break;
             }
 
@@ -38,24 +33,18 @@ class Base58Check
 
     /**
      * Decoding from Base58Check
-     *
-     * @param string $string
-     * @param int $removeLeadingBytes
-     * @param int $removeTrailingBytes
-     * @param bool $removeCompression
-     * @return bool|string
      */
-    public static function decode(string $string, int $removeLeadingBytes = 1, int $removeTrailingBytes = 4, bool $removeCompression = true)
+    public static function decode(string $string, int $removeLeadingBytes = 1, int $removeTrailingBytes = 4, bool $removeCompression = true): string
     {
         $string = bin2hex(Crypto::bc2bin(Base58::decode($string)));
 
         //If end bytes: Network type
-        if ($removeLeadingBytes) {
+        if ($removeLeadingBytes !== 0) {
             $string = substr($string, $removeLeadingBytes * 2);
         }
 
         //If the final bytes: Checksum
-        if ($removeTrailingBytes) {
+        if ($removeTrailingBytes !== 0) {
             $string = substr($string, 0, -($removeTrailingBytes * 2));
         }
 

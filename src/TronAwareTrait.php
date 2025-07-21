@@ -1,17 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace IEXBase\TronAPI;
+namespace Tron;
 
-use IEXBase\TronAPI\Support\{Base58Check, BigInteger, Keccak};
+use Tron\Support\{Base58Check, BigInteger, Keccak};
+use Exception;
+
 trait TronAwareTrait
 {
     /**
      * Convert from Hex
      *
      * @param $string
-     * @return string
      */
-    public function fromHex($string)
+    public function fromHex($string): string
     {
         if(strlen($string) == 42 && mb_substr($string,0,2) === '41') {
             return $this->hexString2Address($string);
@@ -24,9 +25,8 @@ trait TronAwareTrait
      * Convert to Hex
      *
      * @param $str
-     * @return string
      */
-    public function toHex($str)
+    public function toHex($str): string
     {
         if(mb_strlen($str) == 34 && mb_substr($str, 0, 1) === 'T') {
             return $this->address2HexString($str);
@@ -39,9 +39,8 @@ trait TronAwareTrait
      * Check the address before converting to Hex
      *
      * @param $sHexAddress
-     * @return string
      */
-    public function address2HexString($sHexAddress)
+    public function address2HexString($sHexAddress): string
     {
         if(strlen($sHexAddress) == 42 && mb_strpos($sHexAddress, '41') == 0) {
             return $sHexAddress;
@@ -53,9 +52,8 @@ trait TronAwareTrait
      * Check Hex address before converting to Base58
      *
      * @param $sHexString
-     * @return string
      */
-    public function hexString2Address($sHexString)
+    public function hexString2Address($sHexString): string
     {
         if(!ctype_xdigit($sHexString)) {
             return $sHexString;
@@ -72,9 +70,8 @@ trait TronAwareTrait
      * Convert string to hex
      *
      * @param $sUtf8
-     * @return string
      */
-    public function stringUtf8toHex($sUtf8)
+    public function stringUtf8toHex($sUtf8): string
     {
         return bin2hex($sUtf8);
     }
@@ -85,7 +82,7 @@ trait TronAwareTrait
      * @param $sHexString
      * @return string
      */
-    public function hexString2Utf8($sHexString)
+    public function hexString2Utf8($sHexString): string|false
     {
         return hex2bin($sHexString);
     }
@@ -94,9 +91,8 @@ trait TronAwareTrait
      * Convert to great value
      *
      * @param $str
-     * @return BigInteger
      */
-    public function toBigNumber($str) {
+    public function toBigNumber($str): \Tron\Support\BigInteger {
         return new BigInteger($str);
     }
 
@@ -104,7 +100,6 @@ trait TronAwareTrait
      * Convert trx to float
      *
      * @param $amount
-     * @return float
      */
     public function fromTron($amount): float {
         return (float) bcdiv((string)$amount, (string)1e6, 8);
@@ -114,7 +109,6 @@ trait TronAwareTrait
      * Convert float to trx format
      *
      * @param $double
-     * @return int
      */
     public function toTron($double): int {
         return (int) bcmul((string)$double, (string)1e6,0);
@@ -124,11 +118,9 @@ trait TronAwareTrait
      * Convert to SHA3
      *
      * @param $string
-     * @param bool $prefix
-     * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    public function sha3($string, $prefix = true)
+    public function sha3($string, bool $prefix = true): string
     {
         return ($prefix ? '0x' : ''). Keccak::hash($string, 256);
     }

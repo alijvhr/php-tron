@@ -2,6 +2,8 @@
 
 namespace Tron\Exceptions;
 
-class TronErrorException extends \Exception
+use Exception;
+
+class TronErrorException extends Exception
 {
 }

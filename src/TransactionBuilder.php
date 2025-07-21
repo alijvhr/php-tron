@@ -1,7 +1,8 @@
 <?php
-namespace IEXBase\TronAPI;
+namespace Tron;
 
-use IEXBase\TronAPI\Exception\TronException;
+use DateTime;
+use Tron\Exception\TronException;
 
 // Web3 plugin
 use Web3\Contracts\Ethabi;
@@ -10,34 +11,26 @@ use Web3\Contracts\Types\{Address, Boolean, Bytes, DynamicBytes, Integer, Str, U
 class TransactionBuilder
 {
     /**
-     * Base Tron object
-     *
-     * @var Tron
-    */
-    protected $tron;
-
-    /**
      * Create an TransactionBuilder object
-     *
-     * @param Tron $tron
      */
-    public function __construct(Tron $tron)
+    public function __construct(
+        /**
+         * Base Tron object
+         */
+        protected \Tron\Tron $tron
+    )
     {
-        $this->tron = $tron;
     }
 
     /**
      * Creates a transaction of transfer.
      * If the recipient address does not exist, a corresponding account will be created on the blockchain.
      *
-     * @param string $to
-     * @param float $amount
      * @param string|null $from
      * @param string|null $message
-     * @return array
      * @throws TronException
      */
-    public function sendTrx(string $to, float $amount, string $from = null, string $message = null)
+    public function sendTrx(string $to, float $amount, string $from = null, string $message = null): array
     {
         if ($amount < 0) {
             throw new TronException('Invalid amount provided');
@@ -70,16 +63,12 @@ class TransactionBuilder
     /**
      * Transfer Token
      *
-     * @param string $to
-     * @param int $amount
-     * @param string $tokenID
      * @param string|null $from
-     * @return array
      * @throws TronException
      */
-    public function sendToken(string $to, int $amount, string $tokenID, string $from)
+    public function sendToken(string $to, int $amount, string $tokenID, string $from): array
     {
-        if (!is_integer($amount) or $amount <= 0) {
+        if (!is_int($amount) || $amount <= 0) {
             throw new TronException('Invalid amount provided');
         }
 
@@ -95,7 +84,7 @@ class TransactionBuilder
             'owner_address' => $this->tron->address2HexString($from),
             'to_address' => $this->tron->address2HexString($to),
             'asset_name' => $this->tron->stringUtf8toHex($tokenID),
-            'amount' => intval($amount)
+            'amount' => $amount
         ]);
 
         if (array_key_exists('Error', $transfer)) {
@@ -111,16 +100,15 @@ class TransactionBuilder
      * @param $tokenID
      * @param $amount
      * @param $buyer
-     * @return array
      * @throws TronException
      */
-    public function purchaseToken($issuerAddress, $tokenID, $amount, $buyer)
+    public function purchaseToken($issuerAddress, $tokenID, $amount, $buyer): array
     {
         if (!is_string($tokenID)) {
             throw new TronException('Invalid token ID provided');
         }
 
-        if (!is_integer($amount) and $amount <= 0) {
+        if (!is_int($amount) && $amount <= 0) {
             throw new TronException('Invalid amount provided');
         }
 
@@ -140,54 +128,66 @@ class TransactionBuilder
     /**
      * createToken
      *
-     * @param array $options
      * @param null $issuerAddress
-     * @return array
      * @throws TronException
      */
-    public function createToken($options = [], $issuerAddress = null)
+    public function createToken(array $options = [], $issuerAddress = null): array
     {
-        $startDate = new \DateTime();
+        $startDate = new DateTime();
         $startTimeStamp = $startDate->getTimestamp() * 1000;
 
         // Create default parameters in case of their absence
-        if(!$options['totalSupply']) $options['totalSupply'] = 0;
-        if(!$options['trxRatio']) $options['trxRatio'] = 1;
-        if(!$options['tokenRatio']) $options['tokenRatio'] = 1;
-        if(!$options['freeBandwidth']) $options['freeBandwidth'] = 0;
-        if(!$options['freeBandwidthLimit']) $options['freeBandwidthLimit'] = 0;
-        if(!$options['frozenAmount']) $options['frozenAmount'] = 0;
-        if(!$options['frozenDuration']) $options['frozenDuration'] = 0;
+        if (!$options['totalSupply']) {
+            $options['totalSupply'] = 0;
+        }
+        if (!$options['trxRatio']) {
+            $options['trxRatio'] = 1;
+        }
+        if (!$options['tokenRatio']) {
+            $options['tokenRatio'] = 1;
+        }
+        if (!$options['freeBandwidth']) {
+            $options['freeBandwidth'] = 0;
+        }
+        if (!$options['freeBandwidthLimit']) {
+            $options['freeBandwidthLimit'] = 0;
+        }
+        if (!$options['frozenAmount']) {
+            $options['frozenAmount'] = 0;
+        }
+        if (!$options['frozenDuration']) {
+            $options['frozenDuration'] = 0;
+        }
 
         if (is_null($issuerAddress)) {
             $issuerAddress = $this->tron->address['hex'];
         }
 
-        if(!$options['name'] or !is_string($options['name'])) {
+        if(!$options['name'] || !is_string($options['name'])) {
             throw new TronException('Invalid token name provided');
         }
 
-        if(!$options['abbreviation'] or !is_string($options['abbreviation'])) {
+        if(!$options['abbreviation'] || !is_string($options['abbreviation'])) {
             throw new TronException('Invalid token abbreviation provided');
         }
 
-        if(!is_integer($options['totalSupply']) or $options['totalSupply'] <= 0) {
+        if(!is_int($options['totalSupply']) || $options['totalSupply'] <= 0) {
             throw new TronException('Invalid supply amount provided');
         }
 
-        if(!is_integer($options['trxRatio']) or $options['trxRatio'] <= 0) {
+        if(!is_int($options['trxRatio']) || $options['trxRatio'] <= 0) {
             throw new TronException('TRX ratio must be a positive integer');
         }
 
-        if(!is_integer($options['saleStart']) or $options['saleStart'] <= $startTimeStamp) {
+        if(!is_int($options['saleStart']) || $options['saleStart'] <= $startTimeStamp) {
             throw new TronException('Invalid sale start timestamp provided');
         }
 
-        if(!is_integer($options['saleEnd']) or $options['saleEnd'] <= $options['saleStart']) {
+        if(!is_int($options['saleEnd']) || $options['saleEnd'] <= $options['saleStart']) {
             throw new TronException('Invalid sale end timestamp provided');
         }
 
-        if(!$options['description'] or !is_string($options['description'])) {
+        if(!$options['description'] || !is_string($options['description'])) {
             throw new TronException('Invalid token description provided');
         }
 
@@ -195,23 +195,23 @@ class TransactionBuilder
             throw new TronException('Invalid token url provided');
         }
 
-        if(!is_integer($options['freeBandwidth']) || $options['freeBandwidth'] < 0) {
+        if(!is_int($options['freeBandwidth']) || $options['freeBandwidth'] < 0) {
             throw new TronException('Invalid free bandwidth amount provided');
         }
 
-        if(!is_integer($options['freeBandwidthLimit']) || $options['freeBandwidthLimit '] < 0 ||
+        if(!is_int($options['freeBandwidthLimit']) || $options['freeBandwidthLimit '] < 0 ||
             ($options['freeBandwidth'] && !$options['freeBandwidthLimit'])
         ) {
             throw new TronException('Invalid free bandwidth limit provided');
         }
 
-        if(!is_integer($options['frozenAmount']) || $options['frozenAmount '] < 0 ||
+        if(!is_int($options['frozenAmount']) || $options['frozenAmount '] < 0 ||
             (!$options['frozenDuration'] && $options['frozenAmount'])
         ) {
             throw new TronException('Invalid frozen supply provided');
         }
 
-        if(!is_integer($options['frozenDuration']) || $options['frozenDuration '] < 0 ||
+        if(!is_int($options['frozenDuration']) || $options['frozenDuration '] < 0 ||
             ($options['frozenDuration'] && !$options['frozenAmount'])
         ) {
             throw new TronException('Invalid frozen duration provided');
@@ -223,16 +223,16 @@ class TransactionBuilder
             'abbr'  =>   $this->tron->stringUtf8toHex($options['abbreviation']),
             'description'   =>  $this->tron->stringUtf8toHex($options['description']),
             'url'   =>  $this->tron->stringUtf8toHex($options['url']),
-            'total_supply'   =>  intval($options['totalSupply']),
-            'trx_num'   =>  intval($options['trxRatio']),
+            'total_supply'   => $options['totalSupply'],
+            'trx_num'   => $options['trxRatio'],
             'num'   =>  intval($options['tokenRatio']),
-            'start_time'   =>  intval($options['saleStart']),
-            'end_time'   =>  intval($options['saleEnd']),
-            'free_asset_net_limit'  =>  intval($options['freeBandwidth']),
-            'public_free_asset_net_limit'   =>  intval($options['freeBandwidthLimit']),
+            'start_time'   => $options['saleStart'],
+            'end_time'   => $options['saleEnd'],
+            'free_asset_net_limit'  => $options['freeBandwidth'],
+            'public_free_asset_net_limit'   => $options['freeBandwidthLimit'],
             'frozen_supply' =>  [
-                'frozen_amount' =>  intval($options['frozenAmount']),
-                'frozen_days' =>  intval($options['frozenDuration']),
+                'frozen_amount' => $options['frozenAmount'],
+                'frozen_days' => $options['frozenDuration'],
             ]
         ];
 
@@ -251,17 +251,14 @@ class TransactionBuilder
      * Freezes an amount of TRX.
      * Will give bandwidth OR Energy and TRON Power(voting rights) to the owner of the frozen tokens.
      *
-     * @param float $amount
-     * @param int $duration
-     * @param string $resource
      * @param string|null $address
-     * @return array
      * @throws TronException
      */
-    public function freezeBalance(float $amount = 0, int $duration = 3, string $resource = 'BANDWIDTH', string $address = null)
+    public function freezeBalance(float $amount = 0, int $duration = 3, string $resource = 'BANDWIDTH', string $address = null): array
     {
-        if(empty($address))
+        if ($address === null || $address === '' || $address === '0') {
             throw new TronException('Address not specified');
+        }
 
         if (!in_array($resource, ['BANDWIDTH', 'ENERGY'])) {
             throw new TronException('Invalid resource provided: Expected "BANDWIDTH" or "ENERGY"');
@@ -271,7 +268,7 @@ class TransactionBuilder
             throw new TronException('Invalid amount provided');
         }
 
-        if(!is_integer($duration) and $duration < 3) {
+        if(!is_int($duration) && $duration < 3) {
             throw new TronException('Invalid duration provided, minimum of 3 days');
         }
 
@@ -287,12 +284,9 @@ class TransactionBuilder
      * Unfreeze TRX that has passed the minimum freeze duration.
      * Unfreezing will remove bandwidth and TRON Power.
      *
-     * @param string $resource
-     * @param string $owner_address
-     * @return array
      * @throws TronException
      */
-    public function unfreezeBalance(string $resource = 'BANDWIDTH', string $owner_address = null)
+    public function unfreezeBalance(string $resource = 'BANDWIDTH', string $owner_address = null): array
     {
         if(is_null($owner_address)) {
             throw new TronException('Owner Address not specified');
@@ -311,11 +305,10 @@ class TransactionBuilder
     /**
      * Withdraw Super Representative rewards, useable every 24 hours.
      *
-     * @param string $owner_address
-     * @return array
+     * @param string|null $owner_address
      * @throws TronException
      */
-    public function withdrawBlockRewards($owner_address = null)
+    public function withdrawBlockRewards(string $owner_address = null): array
     {
         $withdraw =  $this->tron->getManager()->request('wallet/withdrawbalance', [
             'owner_address' =>  $this->tron->address2HexString($owner_address)
@@ -330,25 +323,20 @@ class TransactionBuilder
     /**
      * Update a Token's information
      *
-     * @param string $description
-     * @param string $url
-     * @param int $freeBandwidth
-     * @param int $freeBandwidthLimit
      * @param $address
-     * @return array
      * @throws TronException
      */
-    public function updateToken(string $description, string $url, int $freeBandwidth = 0, int $freeBandwidthLimit = 0, $address = null)
+    public function updateToken(string $description, string $url, int $freeBandwidth = 0, int $freeBandwidthLimit = 0, $address = null): array
     {
         if(is_null($address)) {
             throw new TronException('Owner Address not specified');
         }
 
-        if (!is_integer($freeBandwidth) || $freeBandwidth < 0) {
+        if (!is_int($freeBandwidth) || $freeBandwidth < 0) {
             throw new TronException('Invalid free bandwidth amount provided');
         }
 
-        if (!is_integer($freeBandwidthLimit) || $freeBandwidthLimit < 0 && ($freeBandwidth && !$freeBandwidthLimit)) {
+        if (!is_int($freeBandwidthLimit) || ($freeBandwidthLimit < 0 && ($freeBandwidth && !$freeBandwidthLimit))) {
             throw new TronException('Invalid free bandwidth limit provided');
         }
 
@@ -356,21 +344,17 @@ class TransactionBuilder
             'owner_address'      =>  $this->tron->address2HexString($address),
             'description'        =>  $this->tron->stringUtf8toHex($description),
             'url'               =>  $this->tron->stringUtf8toHex($url),
-            'new_limit'         =>  intval($freeBandwidth),
-            'new_public_limit'  =>  intval($freeBandwidthLimit)
+            'new_limit'         => $freeBandwidth,
+            'new_public_limit'  => $freeBandwidthLimit
         ]);
     }
 
     /**
      * updateEnergyLimit
      *
-     * @param string $contractAddress
-     * @param int $originEnergyLimit
-     * @param string $ownerAddress
-     * @return array
      * @throws TronException
      */
-    public function updateEnergyLimit(string $contractAddress, int $originEnergyLimit, string $ownerAddress)
+    public function updateEnergyLimit(string $contractAddress, int $originEnergyLimit, string $ownerAddress): array
     {
         $contractAddress = $this->tron->address2HexString($contractAddress);
         $ownerAddress = $this->tron->address2HexString($ownerAddress);
@@ -389,13 +373,9 @@ class TransactionBuilder
     /**
      * updateSetting
      *
-     * @param string $contractAddress
-     * @param int $userFeePercentage
-     * @param string $ownerAddress
-     * @return array
      * @throws TronException
      */
-    public function updateSetting(string $contractAddress, int $userFeePercentage, string $ownerAddress)
+    public function updateSetting(string $contractAddress, int $userFeePercentage, string $ownerAddress): array
     {
         $contractAddress = $this->tron->address2HexString($contractAddress);
         $ownerAddress = $this->tron->address2HexString($ownerAddress);
@@ -413,20 +393,18 @@ class TransactionBuilder
 /**
  * Contract Balance
  * @param string $address $tron->toHex('Txxxxx');
- *
- * @return array
  */
-public function contractbalance($adres)
+public function contractbalance($adres): array
 {
-	$trc20=array();
+	$trc20=[];
   $abi=json_decode('{"entrys": [{"constant": true,"name": "name","outputs": [{"type": "string"}],"type": "Function","stateMutability": "View"},{"name": "approve","inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"}],"outputs": [{"type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"name": "setCanApproveCall","inputs": [{"name": "_val","type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "totalSupply","outputs": [{"type": "uint256"}],"type": "Function","stateMutability": "View"},{"name": "transferFrom","inputs": [{"name": "_from","type": "address"},{"name": "_to","type": "address"},{"name": "_value","type": "uint256"}],"outputs": [{"type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "decimals","outputs": [{"type": "uint8"}],"type": "Function","stateMutability": "View"},{"name": "setCanBurn","inputs": [{"name": "_val","type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"name": "burn","inputs": [{"name": "_value","type": "uint256"}],"outputs": [{"name": "success","type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "balanceOf","inputs": [{"name": "_owner","type": "address"}],"outputs": [{"type": "uint256"}],"type": "Function","stateMutability": "View"},{"constant": true,"name": "symbol","outputs": [{"type": "string"}],"type": "Function","stateMutability": "View"},{"name": "transfer","inputs": [{"name": "_to","type": "address"},{"name": "_value","type": "uint256"}],"outputs": [{"type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "canBurn","outputs": [{"type": "bool"}],"type": "Function","stateMutability": "View"},{"name": "approveAndCall","inputs": [{"name": "_spender","type": "address"},{"name": "_value","type": "uint256"},{"name": "_extraData","type": "bytes"}],"outputs": [{"name": "success","type": "bool"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "allowance","inputs": [{"name": "_owner","type": "address"},{"name": "_spender","type": "address"}],"outputs": [{"type": "uint256"}],"type": "Function","stateMutability": "View"},{"name": "transferOwnership","inputs": [{"name": "_newOwner","type": "address"}],"type": "Function","stateMutability": "Nonpayable"},{"constant": true,"name": "canApproveCall","outputs": [{"type": "bool"}],"type": "Function","stateMutability": "View"},{"type": "Constructor","stateMutability": "Nonpayable"},{"name": "Transfer","inputs": [{"indexed": true,"name": "_from","type": "address"},{"indexed": true,"name": "_to","type": "address"},{"name": "_value","type": "uint256"}],"type": "Event"},{"name": "Approval","inputs": [{"indexed": true,"name": "_owner","type": "address"},{"indexed": true,"name": "_spender","type": "address"},{"name": "_value","type": "uint256"}],"type": "Event"},{"name": "Burn","inputs": [{"indexed": true,"name": "_from","type": "address"},{"name": "_value","type": "uint256"}],"type": "Event"}]}',true);
   $feeLimit=1000000;
   $func="balanceOf";
   $jsonData = json_decode(file_get_contents("https://apilist.tronscan.org/api/token_trc20?sort=issue_time&limit=100&start=0"),true);
-  foreach($jsonData["trc20_tokens"] as $key =>$item)
+  foreach($jsonData["trc20_tokens"] as $item)
   {
 	  $owner=$item["contract_address"];
-	  $params=array("0"=>$this->tron->toHex($adres));
+	  $params=["0"=>$this->tron->toHex($adres)];
   	$result = $this->tron->getTransactionBuilder()->triggerSmartContract(
   	$abi['entrys'],
 	  $this->tron->toHex($owner),
@@ -437,16 +415,16 @@ public function contractbalance($adres)
   	0,
   	0);
     $balance_hex=$result["0"];
-    $balance=0+(float)number_format($balance_hex->value/pow(10,$item["decimals"]),$item["decimals"],".","");
+    $balance=(float)number_format($balance_hex->value/10 ** $item["decimals"],$item["decimals"],".","");
     if($balance>0)
   	{
-      $trc20[]=array(
+      $trc20[]=[
       "name"=>$item["name"],
       "symbol"=>$item["symbol"],
       "balance"=>$balance,
       "value"=>$balance_hex->value,
       "decimals"=>$item["decimals"],
-      );
+      ];
     }
   }
 return $trc20;
@@ -455,52 +433,52 @@ return $trc20;
     /**
      * Triggers smart contract
      *
-     * @param mixed $abi
      * @param string $contract $tron->toHex('Txxxxx');
-     * @param string $function
      * @param array $params array("0"=>$value);
      * @param integer $feeLimit
      * @param string $address $tron->toHex('Txxxxx');
-     * @param int $callValue
-     * @param int $bandwidthLimit
      *
-     * @return mixed
      * @throws TronException
      */
-    public function triggerSmartContract($abi,
-                                         $contract,
-                                         $function,
-                                         $params,
-                                         $feeLimit,
-                                         $address,
-                                         $callValue = 0,
-                                         $bandwidthLimit = 0)
+    public function triggerSmartContract(mixed   $abi,
+                                         string  $contract,
+                                         string  $function,
+                                         array   $params,
+                                         Integer $feeLimit,
+                                         string  $address,
+                                         int     $callValue = 0,
+                                         int     $bandwidthLimit = 0): mixed
     {
         $func_abi = [];
-        foreach($abi as $key =>$item) {
+        foreach($abi as $item) {
             if(isset($item['name']) && $item['name'] === $function) {
                 $func_abi = $item;
                 break;
             }
         }
 
-        if(count($func_abi) === 0)
+        if (count($func_abi) === 0) {
             throw new TronException("Function $function not defined in ABI");
+        }
 
-        if(!is_array($params))
+        if (!is_array($params)) {
             throw new TronException("Function params must be an array");
+        }
 
-        if(count($func_abi['inputs']) !== count($params))
+        if (count($func_abi['inputs']) !== count($params)) {
             throw new TronException("Count of params and abi inputs must be identical");
+        }
 
-        if($feeLimit > 1000000000)
+        if ($feeLimit > 1000000000) {
             throw new TronException('fee_limit must not be greater than 1000000000');
+        }
 
 
-        $inputs = array_map(function($item){ return $item['type']; },$func_abi['inputs']);
+        $inputs = array_map(fn(array $item) => $item['type'],$func_abi['inputs']);
         $signature = $func_abi['name'].'(';
-        if(count($inputs) > 0)
+        if (count($inputs) > 0) {
             $signature .= implode(',',$inputs);
+        }
         $signature .= ')';
 
         $eth_abi = new Ethabi([
@@ -542,43 +520,44 @@ return $trc20;
     /**
      * Triggers constant contract
      *
-     * @param mixed $abi
      * @param string $contract $tron->toHex('Txxxxx');
-     * @param string $function
      * @param array $params array("0"=>$value);
      * @param string $address $tron->toHex('Txxxxx');
      *
-     * @return mixed
      * @throws TronException
      */
-    public function triggerConstantContract($abi,
-                                            $contract,
-                                            $function,
-                                            $params = [],
-                                            $address = '410000000000000000000000000000000000000000')
+    public function triggerConstantContract(mixed  $abi,
+                                            string $contract,
+                                            string $function,
+                                            array  $params = [],
+                                            string $address = '410000000000000000000000000000000000000000'): mixed
     {
         $func_abi = [];
-        foreach($abi as $key =>$item) {
+        foreach($abi as $item) {
             if(isset($item['name']) && $item['name'] === $function) {
                 $func_abi = $item + ['inputs' => []];
                 break;
             }
         }
 
-        if(count($func_abi) === 0)
+        if (count($func_abi) === 0) {
             throw new TronException("Function $function not defined in ABI");
+        }
 
-        if(!is_array($params))
+        if (!is_array($params)) {
             throw new TronException("Function params must be an array");
+        }
 
-        if(count($func_abi['inputs']) !== count($params))
+        if (count($func_abi['inputs']) !== count($params)) {
             throw new TronException("Count of params and abi inputs must be identical");
+        }
 
 
-        $inputs = array_map(function($item){ return $item['type']; },$func_abi['inputs']);
+        $inputs = array_map(fn(array $item) => $item['type'],$func_abi['inputs']);
         $signature = $func_abi['name'].'(';
-        if(count($inputs) > 0)
+        if (count($inputs) > 0) {
             $signature .= implode(',',$inputs);
+        }
         $signature .= ')';
 
         $eth_abi = new Ethabi([

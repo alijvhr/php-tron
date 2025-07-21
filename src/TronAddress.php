@@ -1,26 +1,19 @@
 <?php
-namespace IEXBase\TronAPI;
+namespace Tron;
 
-use IEXBase\TronAPI\Exception\TronException;
+use Tron\Exception\TronException;
 
 class TronAddress
 {
     /**
-     * Результаты генерации адресов
-     *
-     * @var array
-    */
-    protected $response = [];
-
-    /**
      * Конструктор
-     * @param array $data
      * @throws TronException
      */
-    public function __construct(array $data)
+    public function __construct(/**
+     * Результаты генерации адресов
+     */
+    protected array $response)
     {
-        $this->response = $data;
-
         // Проверяем ключи, перед выводом результатов
         if(!$this->array_keys_exist($this->response, ['address_hex', 'private_key', 'public_key'])) {
             throw new TronException('Incorrectly generated address');
@@ -29,9 +22,6 @@ class TronAddress
 
     /**
      * Получение адреса
-     *
-     * @param bool $is_base58
-     * @return string
      */
     public function getAddress(bool $is_base58 = false): string
     {
@@ -40,8 +30,6 @@ class TronAddress
 
     /**
      * Получение публичного ключа
-     *
-     * @return string
      */
     public function getPublicKey(): string
     {
@@ -50,8 +38,6 @@ class TronAddress
 
     /**
      * Получение приватного ключа
-     *
-     * @return string
      */
     public function getPrivateKey(): string
     {
@@ -60,9 +46,7 @@ class TronAddress
 
     /**
      * Получение результатов в массике
-     *
-     * @return array
-    */
+     */
     public function getRawData(): array
     {
         return $this->response;
@@ -70,10 +54,6 @@ class TronAddress
 
     /**
      * Проверка нескольких ключей
-     *
-     * @param array $array
-     * @param array $keys
-     * @return bool
      */
     private function array_keys_exist(array $array, array $keys = []): bool
     {

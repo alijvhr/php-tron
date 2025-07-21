@@ -3,23 +3,17 @@
 namespace Tron\Support;
 
 use Elliptic\EC;
-use IEXBase\TronAPI\Support\Base58;
-use IEXBase\TronAPI\Support\Crypto;
-use IEXBase\TronAPI\Support\Hash;
 
 use InvalidArgumentException;
-use RuntimeException;
 
 class Key
 {
     /**
      * Generate the Address of the provided Public key
-     * 
-     * @param string $publicKey 
-     * 
-     * @return string
+     *
+     *
      */
-    public static function publicKeyToAddress(string $publicKey)
+    public static function publicKeyToAddress(string $publicKey): string
     {
         if (Utils::isHex($publicKey) === false) {
             throw new InvalidArgumentException('Invalid public key format.');
@@ -33,12 +27,9 @@ class Key
 
     /**
      * Generate the Address of the provided Private key
-     * 
-     * @param string $privateKey 
-     * 
-     * @return string
+     *
      */
-    public static function privateKeyToAddress(string $privateKey)
+    public static function privateKeyToAddress(string $privateKey): string
     {
         return self::publicKeyToAddress(
             self::privateKeyToPublicKey($privateKey)
@@ -47,12 +38,10 @@ class Key
 
     /**
      * Generate the Public key for provided Private key
-     * 
+     *
      * @param string $privateKey Private Key
-     * 
-     * @return string
      */
-    public static function privateKeyToPublicKey(string $privateKey)
+    public static function privateKeyToPublicKey(string $privateKey): string
     {
         if (Utils::isHex($privateKey) === false) {
             throw new InvalidArgumentException('Invalid private key format.');
@@ -65,9 +54,8 @@ class Key
 
         $secp256k1 = new EC('secp256k1');
         $privateKey = $secp256k1->keyFromPrivate($privateKey, 'hex');
-        $publicKey = $privateKey->getPublic(false, 'hex');
 
-        return $publicKey;
+        return $privateKey->getPublic(false, 'hex');
     }
 
     public static function getBase58CheckAddress(string $addressHex): string

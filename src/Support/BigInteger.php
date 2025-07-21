@@ -1,25 +1,19 @@
 <?php
-namespace IEXBase\TronAPI\Support;
+namespace Tron\Support;
 
 use GMP;
 use InvalidArgumentException;
 use RuntimeException;
+use Stringable;
 
-class BigInteger
+class BigInteger implements Stringable
 {
     /**
      * The value represented as a string.
      *
      * @var string
      */
-    private $value;
-
-    /**
-     * A flag that indicates whether or not the state of this object can be changed.
-     *
-     * @var bool
-     */
-    private $mutable;
+    private \GMP $value;
 
     /**
      * Initializes a new instance of this class.
@@ -27,16 +21,16 @@ class BigInteger
      * @param string $value The value to set.
      * @param bool $mutable Whether or not the state of this object can be changed.
      */
-    public function __construct(string $value = '0', bool $mutable = true)
+    public function __construct(string $value = '0', /**
+     * A flag that indicates whether or not the state of this object can be changed.
+     */
+    private bool $mutable = true)
     {
         $this->value = $this->initValue($value);
-        $this->mutable = $mutable;
     }
 
     /**
      * Gets the value of the big integer.
-     *
-     * @return string
      */
     public function getValue(): string
     {
@@ -47,7 +41,6 @@ class BigInteger
      * Sets the value.
      *
      * @param string $value The value to set.
-     * @return BigInteger
      */
     public function setValue(string $value): BigInteger
     {
@@ -62,8 +55,6 @@ class BigInteger
 
     /**
      * Converts the value to an absolute number.
-     *
-     * @return BigInteger
      */
     public function abs(): BigInteger
     {
@@ -76,7 +67,6 @@ class BigInteger
      * Adds the given value to this value.
      *
      * @param string $value The value to add.
-     * @return BigInteger
      */
     public function add(string $value): BigInteger
     {
@@ -93,7 +83,7 @@ class BigInteger
      * @param string $value The value to compare.
      * @return int Returns -1 is the number is less than this number. 0 if equal and 1 when greater.
      */
-    public function cmp($value): int
+    public function cmp(string $value): int
     {
         $value = $this->initValue($value);
 
@@ -115,7 +105,6 @@ class BigInteger
      * Divides this value by the given value.
      *
      * @param string $value The value to divide by.
-     * @return BigInteger
      */
     public function divide(string $value): BigInteger
     {
@@ -128,8 +117,6 @@ class BigInteger
 
     /**
      * Calculates factorial of this value.
-     *
-     * @return BigInteger
      */
     public function factorial(): BigInteger
     {
@@ -142,7 +129,6 @@ class BigInteger
      * Performs a modulo operation with the given number.
      *
      * @param string $value The value to perform a modulo operation with.
-     * @return BigInteger
      */
     public function mod(string $value): BigInteger
     {
@@ -157,7 +143,6 @@ class BigInteger
      * Multiplies the given value with this value.
      *
      * @param string $value The value to multiply with.
-     * @return BigInteger
      */
     public function multiply(string $value): BigInteger
     {
@@ -170,8 +155,6 @@ class BigInteger
 
     /**
      * Negates the value.
-     *
-     * @return BigInteger
      */
     public function negate(): BigInteger
     {
@@ -184,7 +167,6 @@ class BigInteger
      * Performs a power operation with the given number.
      *
      * @param int $value The value to perform a power operation with.
-     * @return BigInteger
      */
     public function pow(int $value): BigInteger
     {
@@ -197,7 +179,6 @@ class BigInteger
      * Subtracts the given value from this value.
      *
      * @param string $value The value to subtract.
-     * @return BigInteger
      */
     public function subtract(string $value): BigInteger
     {
@@ -227,8 +208,6 @@ class BigInteger
 
     /**
      * Checks if this object is mutable.
-     *
-     * @return bool
      */
     public function isMutable(): bool
     {
@@ -237,8 +216,6 @@ class BigInteger
 
     /**
      * Converts this class to a string.
-     *
-     * @return string
      */
     public function toString(): string
     {
@@ -247,8 +224,6 @@ class BigInteger
 
     /**
      * Converts this class to a string.
-     *
-     * @return string
      */
     public function __toString(): string
     {
@@ -259,7 +234,6 @@ class BigInteger
      * A helper method to assign the given value.
      *
      * @param GMP $value The value to assign.
-     * @return BigInteger
      */
     private function assignValue(GMP $value): BigInteger
     {
@@ -278,7 +252,6 @@ class BigInteger
      * Creates a new GMP object.
      *
      * @param string $value The value to initialize with.
-     * @return GMP
      * @throws InvalidArgumentException Thrown when the value is invalid.
      */
     private function initValue(string $value): GMP
